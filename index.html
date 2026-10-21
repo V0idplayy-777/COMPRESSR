@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>V0ID</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{--bg:#ece8dd;--card:#f6f3ea;--ink:#15130f;--mut:#6e6a5e;--acc:#ff4d1c;--ok:#1f7a3a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#11100d;--card:#1a1813;--ink:#ece8dd;--mut:#8f8a7c;--acc:#ff6a3d;--ok:#5fd17f}}
+:root[data-theme="dark"]{--bg:#11100d;--card:#1a1813;--ink:#ece8dd;--mut:#8f8a7c;--acc:#ff6a3d;--ok:#5fd17f}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+main{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+h1{margin:0;font:900 clamp(72px,19vw,150px)/.8 "Arial Black",Impact,"Helvetica Neue",sans-serif;letter-spacing:-.05em}
+h1 i{font-style:normal;color:var(--acc)}
+.lede{margin:16px 0 34px;max-width:46ch;color:var(--mut)}
+section{border-top:2px solid var(--ink);padding:14px 0 26px}
+h2{margin:0 0 14px;font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+h2 b{color:var(--acc);margin-right:10px}
+#drop{display:block;border:2px dashed var(--ink);background:var(--card);padding:44px 18px;cursor:pointer}
+#drop.on,#drop:hover{background:var(--acc);color:#15130f}
+#drop input{display:none}
+#drop strong{display:block;font:900 28px/1 "Arial Black",Impact,sans-serif;letter-spacing:-.02em;text-transform:uppercase}
+#info{margin-top:8px;word-break:break-all;font-size:13px}
+.f{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.f>span{width:70px;font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.1em}
+.seg{display:flex;border:2px solid var(--ink)}
+.seg label{cursor:pointer}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label span{display:block;padding:7px 16px;font-size:13px;border-right:2px solid var(--ink)}
+.seg label:last-child span{border-right:0}
+.seg input:checked+span{background:var(--ink);color:var(--bg)}
+.seg input:focus-visible+span{outline:2px solid var(--acc);outline-offset:-5px}
+input[type=range]{accent-color:var(--acc);width:200px}
+.hint{font-size:12px;color:var(--mut);margin:0 0 12px}
+.chk{display:flex;gap:8px;align-items:center;cursor:pointer;font-size:13px}
+.chk input{accent-color:var(--acc);width:16px;height:16px}
+button{font:700 14px ui-monospace,Menlo,Consolas,monospace;text-transform:uppercase;letter-spacing:.08em;border:2px solid var(--ink);background:var(--acc);color:#15130f;padding:13px 26px;cursor:pointer;box-shadow:5px 5px 0 var(--ink)}
+button:active{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--ink)}
+button:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+button.alt{background:var(--card);color:var(--ink)}
+.btns{display:flex;gap:16px;flex-wrap:wrap}
+.bar{height:16px;border:2px solid var(--ink);margin-top:20px;background:var(--card)}
+#bar{height:100%;width:0;background:repeating-linear-gradient(135deg,var(--acc) 0 8px,transparent 8px 12px)}
+#stage{margin-top:8px;font-size:12px;color:var(--mut);min-height:18px}
+#msg{margin-top:6px;font-size:13px}
+.err{color:#d6291a}
+.hero{font:900 clamp(60px,17vw,132px)/.9 "Arial Black",Impact,sans-serif;letter-spacing:-.05em;color:var(--acc)}
+.sz{margin:8px 0 18px;font-size:18px}
+dl{margin:0;display:grid;grid-template-columns:auto 1fr;border-top:1px solid var(--ink)}
+dt,dd{margin:0;padding:7px 0;border-bottom:1px solid var(--ink)}
+dt{color:var(--mut);padding-right:20px;font-size:12px;text-transform:uppercase;letter-spacing:.1em}
+dd{text-align:right}
+details{margin-top:16px;font-size:12px}
+summary{cursor:pointer;text-transform:uppercase;letter-spacing:.1em;color:var(--mut)}
+pre{margin:8px 0 0;white-space:pre-wrap;color:var(--mut)}
+</style></head><body><main>
+<h1>V<i>0</i>ID</h1>
+<p class="lede">Compression that tries as hard as physically possible. It recognises the format, models it properly, and runs in your browser. Your files never leave it.</p>
+<section><h2><b>01</b>Input</h2>
+<label id="drop"><input type="file" id="file"><strong>Drop a file</strong><div id="info">or tap to choose. Drop a V0ID archive to restore it.</div></label></section>
+<section><h2><b>02</b>Settings</h2>
+<div class="f"><span>Mode</span><div class="seg">
+<label><input type="radio" name="md" value="lossless" checked><span>Lossless</span></label>
+<label><input type="radio" name="md" value="lossy"><span>Lossy</span></label></div></div>
+<div class="f" id="auto" hidden><label class="chk"><input type="checkbox" id="ac" checked> Auto quality: smallest file with no visible loss (about 41 dB PSNR)</label></div>
+<div class="f" id="qf" hidden><span id="ql">Quality</span><input type="range" id="q" min="10" max="95" value="75"><output id="qo">75</output></div>
+<p class="hint" id="ln" hidden>This format has no safe lossy form, so it will be compressed losslessly.</p>
+<div class="f"><span>Effort</span><div class="seg" id="tier">
+<label><input type="radio" name="tier" value="0"><span>Fast</span></label>
+<label><input type="radio" name="tier" value="1" checked><span>Balanced</span></label>
+<label><input type="radio" name="tier" value="2"><span>Max</span></label></div></div>
+<p class="hint">Fast and Balanced split big files across your CPU cores. Max keeps one stream for the best ratio and runs the tuner.</p>
+<label class="chk"><input type="checkbox" id="ver"> Verify by decoding afterwards (slower)</label></section>
+<section><div class="btns"><button id="run" disabled>Compress</button><button id="dl" class="alt" hidden>Save result</button></div>
+<div class="bar"><div id="bar"></div></div><div id="stage"></div><div id="msg"></div></section>
+<section id="res" hidden><h2><b>03</b>Result</h2><div class="hero" id="hero"></div><div class="sz" id="sz"></div><dl id="st"></dl>
+<details id="lc" hidden><summary>Optimiser log</summary><pre id="log"></pre></details></section>
+</main>
+<script id="core">
+const SQ=[1,2,3,6,10,16,27,45,73,120,194,310,488,747,1101,1546,2047,2549,2994,3348,3607,3785,3901,3975,4022,4050,4068,4079,4085,4089,4092,4093,4094];
+function squash(d){if(d>2047)return 4095;if(d<-2047)return 0;const w=d&127,i=(d>>7)+16;return(SQ[i]*(128-w)+SQ[i+1]*w+64)>>7}
+const ST=new Int16Array(4096);
+(()=>{let pi=0;for(let x=-2047;x<=2047;x++){const v=squash(x);for(let i=pi;i<=v;i++)ST[i]=x;pi=v+1}for(let i=pi;i<4096;i++)ST[i]=2047})();
+const RT=new Float64Array(256);for(let i=0;i<256;i++)RT[i]=1/(i+1.6);
+const PRESETS=[{lr:.010,lim:250,ar:7},{lr:.020,lim:60,ar:6},{lr:.005,lim:255,ar:7},{lr:.035,lim:30,ar:5}];
+const TIERS=[{N:5,K:1},{N:7,K:2},{N:7,K:3}];
+const PN=["balanced","adaptive","stationary","turbo-adaptive"],TN=["none","delta 1","delta 2","delta 3","delta 4"],EN=["Fast","Balanced","Max"];
+const hh=(a,s)=>{const h=Math.imul(a^Math.imul(s+1,0x632BE5AB),0x9E3779B1);return h^(h>>>15)};
+const tick=()=>new Promise(r=>setTimeout(r,0));
+class MM{
+constructor(buf,minLen,bits){this.b=buf;this.m=minLen;this.t=new Int32Array(1<<bits);this.sh=32-bits;this.ptr=0;this.len=0;this.pbit=-1;this.lb=0;this.pc=new Uint16Array(33).fill(49152)}
+upd(pos){
+const b=this.b;
+if(this.len>0&&b[this.ptr]===b[pos-1]){this.len++;this.ptr++}else this.len=0;
+if(pos<this.m)return;
+let h=0;for(let i=pos-this.m;i<pos;i++)h=Math.imul(h+b[i]+1,0x2F0B4C27);
+const k=Math.imul(h^(h>>>15),0x9E3779B1)>>>this.sh;
+if(this.len===0){const q=this.t[k];if(q>0){let l=0;while(l<64&&q-1-l>=0&&b[q-1-l]===b[pos-1-l])l++;if(l>=this.m){this.len=l;this.ptr=q}}}
+this.t[k]=pos}
+inp(x,k,c0,bp){
+this.pbit=-1;x[k]=0;x[k+1]=0;
+if(this.len<=0)return;
+const eb=this.b[this.ptr];
+if(((eb|256)>>(8-bp))!==c0)return;
+const bit=(eb>>(7-bp))&1,L=this.len;
+this.lb=L<16?L:L<144?16+((L-16)>>3):32;
+this.pbit=bit;
+const s=ST[this.pc[this.lb]>>>4]*0.00390625;
+x[k]=bit?s:-s;
+const f=(L>32?32:L)/16;x[k+1]=bit?f:-f}
+q(){return this.pbit<0?0:this.len<16?1:this.len<32?2:3}
+upd1(y){if(this.pbit>=0){const t=y===this.pbit?65535:0;this.pc[this.lb]+=(t-this.pc[this.lb])>>6}}
+}
+class Model{
+constructor(n,cfg){
+const pr=cfg.p,P=cfg.prof||null;
+this.lr=pr.lr;this.lim=pr.lim;this.ar=pr.ar;this.prof=P;this.mode=P?P.k:"";
+let b=16;while(b<21&&(1<<b)<n*4)b++;
+this.sh=32-b;
+const sz=1<<b,N=cfg.t.N+(this.mode==="txt"?2:0),K=cfg.t.K,NI=N+6;
+this.N=N;this.K=K;this.NI=NI;this.fa=K>1;
+this.P=[];
+for(let i=0;i<N;i++)this.P.push(new Uint32Array(sz).fill(2147483648));
+this.P0=new Uint32Array(256).fill(2147483648);
+this.buf=new Uint8Array(n+8);this.pos=0;
+const mb=Math.min(b,20);
+this.m1=new MM(this.buf,5,mb);this.m2=new MM(this.buf,12,mb);
+this.h=new Int32Array(9);this.idx=new Int32Array(N);
+this.x=new Float64Array(NI);
+this.W=[];for(let k=0;k<K;k++)this.W.push(new Float64Array(256*NI).fill(.25));
+this.W2=new Float64Array(8*K).fill(1/K);
+this.x2=new Float64Array(K);this.pm=new Int32Array(K);this.sel=new Int32Array(3);
+this.A1=new Uint16Array(256*33);this.A2=this.fa?new Uint16Array(65536*33):null;
+for(let j=0;j<33;j++){const v=squash((j-16)*128)*16;for(let c=0;c<256;c++)this.A1[c*33+j]=v;if(this.fa)for(let c=0;c<65536;c++)this.A2[c*33+j]=v}
+this.ls=0;this.pls=0;this.fld=0;
+this.c0=1;this.bp=0;this.c4=0;this.c8=0;this.wh=0;this.w1=0;this.pf=2048;this.j1=0;this.j2=0;
+this.cx()}
+cx(){
+const P=this.prof;
+if(!P)return this.ctx();
+if(P.k==="txt")return this.tctx();
+if(this.pos<P.off)return this.ctx();
+return P.k==="img"?this.ictx():this.rctx()}
+ctx(){
+const c4=this.c4,c8=this.c8,h=this.h;
+h[0]=hh(c4&255,1);h[1]=hh(c4&65535,2);h[2]=hh(c4&0xffffff,3);h[3]=hh(c4,4);
+h[4]=hh(c4^Math.imul(c8&65535,0x2545F491),5);
+h[5]=hh(this.wh+Math.imul(this.w1,0x2F0B4C27)+(this.wh?0:c4&255),6);
+h[6]=hh((c4>>>8)&65535,7)}
+tctx(){
+const c4=this.c4,c8=this.c8,h=this.h,b=this.buf,col=this.pos-this.ls,pl=this.pls+col;
+const ab=pl<this.ls?b[pl]:0,ab2=pl+1<this.ls?b[pl+1]:0;
+h[0]=hh(c4&255,1);h[1]=hh(c4&65535,2);h[2]=hh(c4&0xffffff,3);h[3]=hh(c4,4);
+h[4]=hh(c4^Math.imul(c8&65535,0x2545F491),5);
+h[5]=hh(ab|(ab2<<8)|((c4&255)<<16),8);
+h[6]=hh((this.fld&255)|((c4&0xffff)<<8),9);
+h[7]=hh(this.wh+Math.imul(this.w1,0x2F0B4C27)+(this.wh?0:c4&255),6);
+h[8]=hh((c4>>>8)&65535,7)}
+ictx(){
+const i=this.pos,b=this.buf,P=this.prof,ch=P.ch,R=P.rowB,h=this.h,cc=(((i-P.off)%ch)+ch)%ch;
+const g=k=>i-k>=0?b[i-k]:0;
+const a=g(ch),u=g(R),c=g(R+ch),d=cc?g(1):0,e=cc>1?g(2):0,f=g(R-ch);
+let gr=a+u-c;gr=gr<0?0:gr>255?255:gr;
+const s=cc*16;
+h[0]=hh(a|(u<<8),s+1);
+h[1]=hh(gr|(d<<8),s+2);
+h[2]=hh(a|(d<<8)|(e<<16),s+3);
+h[3]=hh(u|(d<<8)|(f<<16),s+4);
+h[4]=hh((a>>2)|((u>>2)<<6)|((c>>2)<<12)|((d>>3)<<18),s+5);
+h[5]=hh(((a-c)&255)|(((u-c)&255)<<8)|(gr<<16),s+6);
+h[6]=hh(((a+u)>>1)|(d<<8),s+7)}
+rctx(){
+const i=this.pos,b=this.buf,P=this.prof,S=P.S,h=this.h,p=(((i-P.off)%S)+S)%S,s=p*8;
+const g=k=>i-k>=0?b[i-k]:0;
+const a=g(S),a2=g(2*S),b1=g(1),b2=g(2),a1=g(S+1),am=g(S-1);
+h[0]=hh(a,s+1);
+h[1]=hh(a|(b1<<8),s+2);
+h[2]=hh(a|(a2<<8),s+3);
+h[3]=hh(b1|(b2<<8),s+4);
+h[4]=hh(a|(a1<<8)|(am<<16),s+5);
+h[5]=hh(((2*a-a2)&255)|(b1<<8),s+6);
+h[6]=hh(b1|(a<<8)|(a2<<16),s+7)}
+p(){
+const N=this.N,K=this.K,NI=this.NI,x=this.x,c0=this.c0,bp=this.bp,sh=this.sh,P=this.P,h=this.h,idx=this.idx;
+const cm=Math.imul(c0,0x6F4F2A35);
+for(let i=0;i<N;i++){
+const j=Math.imul(h[i]^cm,0x2C9277B5)>>>sh,v=P[i][j];
+idx[i]=j;
+x[i]=(v&1023)?ST[v>>>20]*0.00390625:0}
+const v0=this.P0[c0];
+x[N]=(v0&1023)?ST[v0>>>20]*0.00390625:0;
+this.m1.inp(x,N+1,c0,bp);this.m2.inp(x,N+3,c0,bp);
+x[N+5]=.5;
+const s=this.sel,x2=this.x2;
+s[0]=c0;s[1]=this.c4&255;s[2]=(this.m1.q()*4+this.m2.q())*8+bp;
+for(let k=0;k<K;k++){
+const w=this.W[k],o=s[k]*NI;let d=0;
+for(let i=0;i<NI;i++)d+=w[o+i]*x[i];
+if(d>7.99)d=7.99;else if(d<-7.99)d=-7.99;
+x2[k]=d;this.pm[k]=squash(Math.round(d*256))}
+let pf;
+if(K===1)pf=this.pm[0];
+else{
+const o2=bp*K;let d=0;
+for(let k=0;k<K;k++)d+=this.W2[o2+k]*x2[k];
+if(d>7.99)d=7.99;else if(d<-7.99)d=-7.99;
+pf=squash(Math.round(d*256))}
+this.pf=pf;
+const st=ST[pf]+2048,lo=st>>7,w=st&127,nr=w>>6;
+const i1=lo+c0*33,a1=(this.A1[i1]*(128-w)+this.A1[i1+1]*w)>>7;
+this.j1=i1+nr;
+let p;
+if(this.fa){
+const i2=lo+(c0|((this.c4&255)<<8))*33,a2=(this.A2[i2]*(128-w)+this.A2[i2+1]*w)>>7;
+this.j2=i2+nr;p=(pf*16+a1+a2*2)>>2}
+else p=(pf*16+a1*3)>>2;
+return p<24?24:p>65511?65511:p}
+update(y){
+const T=y?4194303:0,N=this.N,K=this.K,lim=this.lim,P=this.P,idx=this.idx;
+for(let i=0;i<N;i++){
+const j=idx[i],A=P[i],v=A[j],n=v&1023,pp=v>>>10;
+A[j]=(((pp+(((T-pp)*RT[n])|0))<<10)|(n<lim?n+1:n))>>>0}
+const c=this.c0,v0=this.P0[c],n0=v0&1023,p0=v0>>>10;
+this.P0[c]=(((p0+(((T-p0)*RT[n0])|0))<<10)|(n0<lim?n0+1:n0))>>>0;
+this.m1.upd1(y);this.m2.upd1(y);
+const NI=this.NI,x=this.x,e0=this.lr;
+for(let k=0;k<K;k++){
+const w=this.W[k],o=this.sel[k]*NI,e=(y-this.pm[k]/4096)*e0;
+for(let i=0;i<NI;i++)w[o+i]+=e*x[i]}
+if(K>1){
+const e2=(y-this.pf/4096)*e0*.5,o2=this.bp*K;
+for(let k=0;k<K;k++)this.W2[o2+k]+=e2*this.x2[k]}
+const t=y?65535:0,ar=this.ar;
+this.A1[this.j1]+=(t-this.A1[this.j1])>>ar;
+if(this.fa)this.A2[this.j2]+=(t-this.A2[this.j2])>>ar;
+this.c0=c*2+y;this.bp++;
+if(this.bp===8){this.byte(this.c0&255);this.c0=1;this.bp=0}}
+byte(c){
+this.buf[this.pos++]=c;
+this.c8=((this.c8<<8)|(this.c4>>>24))>>>0;
+this.c4=((this.c4<<8)|c)>>>0;
+const l=c|32;
+if((l>=97&&l<=122)||c>=128){this.wh=hh(this.wh,l)}else if(this.wh){this.w1=this.wh;this.wh=0}
+if(c===10){this.pls=this.ls;this.ls=this.pos;this.fld=0}else if(c===44||c===9||c===32||c===59||c===124||c===58)this.fld++;
+this.m1.upd(this.pos);this.m2.upd(this.pos);
+this.cx()}
+}
+async function enc(data,cfg,prog){
+const n=data.length,m=new Model(n,cfg),out=new Uint8Array(n+(n>>2)+1024);
+let o=0,x1=0,x2=0xffffffff;
+for(let i=0;i<n;i++){
+const c=data[i];
+for(let b=7;b>=0;b--){
+const y=(c>>b)&1,p=m.p(),r=x2-x1;
+const xm=(x1+(r>>>16)*p+(((r&65535)*p)>>>16))>>>0;
+if(y)x2=xm;else x1=xm+1;
+m.update(y);
+while(((x1^x2)&0xff000000)===0){out[o++]=x2>>>24;x1=(x1<<8)>>>0;x2=((x2<<8)|255)>>>0}}
+if(prog&&(i&16383)===16383){prog(i/n);await tick()}}
+out[o++]=x1>>>24;out[o++]=(x1>>>16)&255;out[o++]=(x1>>>8)&255;out[o++]=x1&255;
+return out.subarray(0,o)}
+async function dec(pl,n,cfg,prog){
+const m=new Model(n,cfg),out=new Uint8Array(n);
+let x1=0,x2=0xffffffff,x=0,pp=0;
+for(let i=0;i<4;i++)x=((x<<8)|(pl[pp++]||0))>>>0;
+for(let i=0;i<n;i++){
+let c=0;
+for(let b=0;b<8;b++){
+const p=m.p(),r=x2-x1;
+const xm=(x1+(r>>>16)*p+(((r&65535)*p)>>>16))>>>0;
+const y=x<=xm?1:0;
+if(y)x2=xm;else x1=xm+1;
+m.update(y);c=(c<<1)|y;
+while(((x1^x2)&0xff000000)===0){x1=(x1<<8)>>>0;x2=((x2<<8)|255)>>>0;x=((x<<8)|(pl[pp++]||0))>>>0}}
+out[i]=c;
+if(prog&&(i&16383)===16383){prog(i/n);await tick()}}
+return out}
+function fwd(d,s){if(!s)return d;const o=new Uint8Array(d.length);for(let i=0;i<d.length;i++)o[i]=i>=s?(d[i]-d[i-s])&255:d[i];return o}
+function inv(d,s){if(!s)return d;const o=new Uint8Array(d.length);for(let i=0;i<d.length;i++)o[i]=i>=s?(d[i]+o[i-s])&255:d[i];return o}
+function sample(d,L){const n=d.length;if(n<=L*3)return d;const o=new Uint8Array(L*3),m=(n-L)>>1;o.set(d.subarray(0,L));o.set(d.subarray(m,m+L),L);o.set(d.subarray(n-L),L*2);return o}
+const L16=(d,o)=>d[o]|(d[o+1]<<8),L32=(d,o)=>(d[o]|(d[o+1]<<8)|(d[o+2]<<16)|(d[o+3]<<24))>>>0;
+const B16=(d,o)=>(d[o]<<8)|d[o+1],B32=(d,o)=>((d[o]<<24)|(d[o+1]<<16)|(d[o+2]<<8)|d[o+3])>>>0;
+const tg=(d,o)=>String.fromCharCode(d[o],d[o+1],d[o+2],d[o+3]);
+function fnd(d,pat,from){const n=d.length-pat.length,f=pat[0];for(let i=from;i<=n;i++){if(d[i]!==f)continue;let k=1;while(k<pat.length&&d[i+k]===pat[k])k++;if(k===pat.length)return i}return -1}
+function analyze(d,name,type){
+const n=d.length,ext=(name.split(".").pop()||"").toLowerCase();
+const A={fmt:"Binary file",lossy:null,prof:null,aud:null,x86:false,web:false,dec:null,txt:false};
+const png=d[0]===137&&d[1]===80&&d[2]===78,jpg=d[0]===255&&d[1]===216&&d[2]===255,gif=d[0]===71&&d[1]===73&&d[2]===70,wbp=n>12&&tg(d,0)==="RIFF"&&tg(d,8)==="WEBP";
+if(png||jpg||gif||wbp){A.fmt=png?"PNG image":jpg?"JPEG image":gif?"GIF image":"WebP image";A.web=true;A.lossy="img";return A}
+if(n>54&&d[0]===66&&d[1]===77){
+const off=L32(d,10),w=Math.abs(L32(d,18)|0),h=Math.abs(L32(d,22)|0),bpp=L16(d,28),cm=L32(d,30);
+if((cm===0||cm===3)&&(bpp===8||bpp===16||bpp===24||bpp===32)&&off<n&&w>0&&h>0){
+A.fmt="BMP "+w+"×"+h+", "+bpp+"-bit";A.prof={k:"img",off,ch:bpp>>3,rowB:((w*bpp+31)>>5)<<2};A.web=true;A.lossy="img";return A}}
+if(n>16&&((d[0]===73&&d[1]===73&&d[2]===42&&d[3]===0)||(d[0]===77&&d[1]===77&&d[2]===0&&d[3]===42))){
+const le=d[0]===73,r16=o=>le?L16(d,o):B16(d,o),r32=o=>le?L32(d,o):B32(d,o),ifd=r32(4);
+A.fmt="TIFF";
+if(ifd+2<n){
+const cnt=r16(ifd),T={};
+for(let k=0;k<cnt&&ifd+14+k*12<=n;k++){const o=ifd+2+k*12,tag=r16(o),ty=r16(o+2),c=r32(o+4),sz=ty===3?2:4,at=sz*c<=4?o+8:r32(o+8);if(at+sz<=n)T[tag]=ty===3?r16(at):r32(at)}
+const w=T[256],h=T[257],bps=T[258]||1,spp=T[277]||1,off=T[273];
+if(w&&h&&off&&(T[259]||1)===1&&(T[284]||1)===1&&(bps===8||bps===16)&&spp<=4){
+const ch=spp*(bps>>3);A.fmt="TIFF "+w+"×"+h+", "+spp+"×"+bps+"-bit";A.prof={k:"img",off,ch,rowB:w*ch};
+if((spp===1||spp===3||spp===4)&&T[262]!==3){A.lossy="img";A.dec={w,h,ch:spp,bps:bps>>3,off,rowB:w*ch,le}}}}
+return A}
+if(n>400&&tg(d,128)==="DICM"){
+A.fmt="DICOM";
+const us=(a,b)=>{const i=fnd(d,[0x28,0,a,b,85,83,2,0],132);return i<0?0:L16(d,i+8)};
+const rows=us(0x10,0),cols=us(0x11,0),bits=us(0,1),spp=us(2,0)||1;
+let pi=fnd(d,[0xE0,0x7F,0x10,0,79,87,0,0],132);
+if(pi<0)pi=fnd(d,[0xE0,0x7F,0x10,0,79,66,0,0],132);
+if(rows&&cols&&(bits===8||bits===16)&&pi>=0&&L32(d,pi+8)!==0xFFFFFFFF){
+const off=pi+12,ch=spp*(bits>>3);A.fmt="DICOM "+cols+"×"+rows+", "+bits+"-bit";A.prof={k:"img",off,ch,rowB:cols*ch};
+if(spp===1||spp===3){A.lossy="img";A.dec={w:cols,h:rows,ch:spp,bps:bits>>3,off,rowB:cols*ch,le:true}}}
+return A}
+if(ext==="tga"&&n>18){
+const idl=d[0],cmt=d[1],ty=d[2],w=L16(d,12),h=L16(d,14),bpp=d[16],ds=d[17];
+if((ty===2||ty===3)&&(bpp===8||bpp===16||bpp===24||bpp===32)&&w&&h){
+const off=18+idl+(cmt?L16(d,5)*((d[7]+7)>>3):0),ch=bpp>>3;
+A.fmt="TGA "+w+"×"+h+", "+bpp+"-bit";A.prof={k:"img",off,ch,rowB:w*ch};
+if(ch!==2){A.lossy="img";A.dec={w,h,ch,bps:1,off,rowB:w*ch,flip:!(ds&32),bgr:ty===2}}
+return A}}
+if(d[0]===80&&(d[1]===52||d[1]===53||d[1]===54)&&d[2]<=32){
+const bin=d[1],need=bin===52?2:3,v=[];let p=2;
+while(v.length<need&&p<300){const c=d[p];if(c===35){while(p<300&&d[p]!==10)p++}else if(c<=32)p++;else if(c>=48&&c<=57){let x=0;while(d[p]>=48&&d[p]<=57)x=x*10+d[p++]-48;v.push(x)}else break}
+if(v.length===need&&v[0]>0&&v[1]>0){
+const w=v[0],h=v[1],off=p+1;
+if(bin===52){A.fmt="PBM "+w+"×"+h;A.prof={k:"img",off,ch:1,rowB:(w+7)>>3}}
+else{const bps=v[2]>255?2:1,sp=bin===54?3:1,ch=sp*bps;
+A.fmt=(bin===54?"PPM ":"PGM ")+w+"×"+h+", "+(bps*8)+"-bit";A.prof={k:"img",off,ch,rowB:w*ch};A.lossy="img";A.dec={w,h,ch:sp,bps,off,rowB:w*ch,le:false}}
+return A}}
+if(tg(d,0)==="YUV4"&&tg(d,4)==="MPEG"){
+const e=d.indexOf(10),hl=String.fromCharCode.apply(null,d.subarray(0,Math.min(e<0?300:e,300))),m=hl.match(/ W(\d+)/);
+A.fmt="Y4M video";if(m)A.prof={k:"img",off:e+1,ch:1,rowB:+m[1]};return A}
+if(n>44&&tg(d,0)==="RIFF"&&tg(d,8)==="WAVE"){
+A.fmt="WAV";let p=12,ft=0,chn=0,bits=0;
+while(p+8<=n){
+const id=tg(d,p),sz=L32(d,p+4);
+if(id==="fmt "){ft=L16(d,p+8);chn=L16(d,p+10);bits=L16(d,p+22)}
+else if(id==="data"){
+const off=p+8,len=Math.min(sz,n-off);
+if((ft===1||ft===65534)&&(bits===8||bits===16||bits===24||bits===32)&&chn>0&&chn<=8){A.aud={off,len,bs:bits>>3,ch:chn,be:false,uns:bits===8};A.fmt="WAV PCM "+bits+"-bit ×"+chn;A.lossy="aud"}
+else if(ft===3&&bits&&chn)A.prof={k:"rec",off,S:(bits>>3)*chn};
+break}
+p+=8+sz+(sz&1)}
+return A}
+if(n>44&&tg(d,0)==="RIFF"&&tg(d,8)==="AVI "){A.fmt="AVI video";return A}
+if(n>12&&tg(d,0)==="FORM"&&(tg(d,8)==="AIFF"||tg(d,8)==="AIFC")){
+A.fmt="AIFF";let p=12,chn=0,bits=0,le=false,ok=tg(d,8)==="AIFF";
+while(p+8<=n){
+const id=tg(d,p),sz=B32(d,p+4);
+if(id==="COMM"){chn=B16(d,p+8);bits=B16(d,p+14);if(!ok&&sz>=22){const c=tg(d,p+26);if(c==="NONE"||c==="sowt"){ok=true;le=c==="sowt"}}}
+else if(id==="SSND"){
+const so=B32(d,p+8),off=p+16+so,len=Math.min(sz-8-so,n-off);
+if(ok&&(bits===8||bits===16||bits===24||bits===32)&&chn>0&&chn<=8&&len>0){A.aud={off,len,bs:bits>>3,ch:chn,be:!le,uns:false};A.fmt="AIFF PCM "+bits+"-bit ×"+chn;A.lossy="aud"}
+break}
+p+=8+sz+(sz&1)}
+return A}
+if(n>20&&tg(d,0)==="caff"){
+A.fmt="CAF";let p=8,ok=false,bits=0,chn=0,le=false;
+while(p+12<=n){
+const id=tg(d,p),sz=B32(d,p+8);
+if(id==="desc"&&tg(d,p+20)==="lpcm"){const fl=B32(d,p+24);chn=B32(d,p+36);bits=B32(d,p+40);ok=!(fl&1)&&(bits===8||bits===16||bits===24||bits===32);le=!!(fl&2)}
+else if(id==="data"){
+const off=p+16,len=Math.min(sz-4,n-off);
+if(ok&&chn>0&&chn<=8&&len>0){A.aud={off,len,bs:bits>>3,ch:chn,be:!le,uns:false};A.fmt="CAF PCM "+bits+"-bit ×"+chn;A.lossy="aud"}
+break}
+p+=12+sz}
+return A}
+if(tg(d,0)==="DSD "){A.fmt="DSF audio (1-bit DSD)";return A}
+if(tg(d,0)==="FRM8"){A.fmt="DFF audio (1-bit DSD)";return A}
+if(n>12){const t4=tg(d,4);if(t4==="ftyp"||t4==="moov"||t4==="mdat"||t4==="wide"||t4==="free"||t4==="skip"){A.fmt="MOV/MP4 container";return A}}
+if(d[0]===0x76&&d[1]===0x2f&&d[2]===0x31&&d[3]===1){A.fmt="OpenEXR";return A}
+if(d[0]===0&&d[1]===97&&d[2]===115&&d[3]===109){A.fmt="WebAssembly";return A}
+if(d[0]===127&&d[1]===69&&d[2]===76&&d[3]===70){const m=L16(d,18);A.x86=m===3||m===62;A.fmt="ELF"+(A.x86?" (x86)":"");return A}
+if(d[0]===77&&d[1]===90){A.fmt=ext==="dll"?"DLL (PE)":"EXE (PE)";A.x86=true;return A}
+if(n>100&&B32(d,0)===9994){A.fmt="Shapefile";return A}
+if(n>84){const cnt=L32(d,80);if(cnt>0&&n===84+50*cnt){A.fmt="STL (binary)";A.prof={k:"rec",off:84,S:50};return A}}
+if(d[0]===112&&d[1]===108&&d[2]===121&&(d[3]===10||d[3]===13)){
+const head=String.fromCharCode.apply(null,d.subarray(0,Math.min(n,4096))),e=head.indexOf("end_header");
+if(e>0){
+A.fmt="PLY";
+if(/format ascii/.test(head)){A.txt=true;A.prof={k:"txt",off:0};A.lossy="txt";A.fmt="PLY (ascii)";return A}
+const off=head.indexOf("\n",e)+1,m={char:1,uchar:1,int8:1,uint8:1,short:2,ushort:2,int16:2,uint16:2,int:4,uint:4,int32:4,uint32:4,float:4,float32:4,double:8,float64:8};
+let S=0,inV=false;
+for(const ln of head.slice(0,e).split(/\r?\n/)){const t=ln.trim().split(/\s+/);if(t[0]==="element")inV=t[1]==="vertex";else if(t[0]==="property"&&inV)S+=m[t[1]]||0}
+if(S>0){A.fmt="PLY (binary)";A.prof={k:"rec",off,S}}
+return A}}
+const L=Math.min(n,32768);let pr=0,nul=0;
+for(let i=0;i<L;i++){const c=d[i];if(c===0)nul++;else if(c>=32||c===9||c===10||c===13)pr++}
+if(n>0&&!nul&&pr/L>.93){A.txt=true;A.prof={k:"txt",off:0};A.lossy="txt";A.fmt=(ext&&ext.length<6?ext.toUpperCase()+" ":"")+"text"}
+return A}
+function pickPo(d,a){
+const bs=a.bs,fr=bs*a.ch,M=Math.pow(2,8*bs),H=M/2,nf=Math.min(Math.floor(a.len/fr),8192);
+const rd=p=>{let v=0;if(a.be)for(let k=0;k<bs;k++)v=v*256+d[p+k];else for(let k=bs-1;k>=0;k--)v=v*256+d[p+k];return v};
+const cost=[0,0,0];
+for(let t=2;t<nf;t++){const p=a.off+t*fr,u=rd(p),u1=rd(p-fr),u2=rd(p-2*fr);
+const pr=[0,u1,2*u1-u2];
+for(let o=0;o<3;o++){let r=((u-pr[o])%M+M)%M;if(r>=H)r=M-r;cost[o]+=r}}
+return cost[2]<=cost[1]&&cost[2]<=cost[0]?2:cost[1]<=cost[0]?1:0}
+function pcm(d,a,inverse,q){
+const bs=a.bs,ch=a.ch,fr=bs*ch,nf=Math.floor(a.len/fr),M=Math.pow(2,8*bs),H=M/2,po=a.po,o=d.slice();
+const rd=(b,p)=>{let v=0;if(a.be)for(let k=0;k<bs;k++)v=v*256+b[p+k];else for(let k=bs-1;k>=0;k--)v=v*256+b[p+k];return v};
+const wr=(b,p,v)=>{if(a.be)for(let k=bs-1;k>=0;k--){b[p+k]=v%256;v=Math.floor(v/256)}else for(let k=0;k<bs;k++){b[p+k]=v%256;v=Math.floor(v/256)}};
+if(!inverse&&q){
+const st=Math.pow(2,q);
+for(let t=0;t<nf*ch;t++){const p=a.off+t*bs,u=rd(o,p);let s=a.uns?u-H:(u>=H?u-M:u);s=Math.floor((s+st/2)/st)*st;if(s>H-st)s=H-st;if(s<-H)s=-H;wr(o,p,a.uns?s+H:(s<0?s+M:s))}}
+const src=inverse?o:o.slice();
+for(let t=0;t<nf;t++)for(let c=0;c<ch;c++){
+const p=a.off+(t*ch+c)*bs,u1=t>0?rd(o,p-fr):0,u2=t>1?rd(o,p-2*fr):0,w1=!inverse&&t>0?rd(src,p-fr):0,w2=!inverse&&t>1?rd(src,p-2*fr):0;
+if(inverse){const pr=po===0?0:po===1?u1:2*u1-u2;wr(o,p,(((rd(o,p)+pr)%M)+M)%M)}
+else{const pr=po===0?0:po===1?w1:2*w1-w2;wr(o,p,(((rd(src,p)-pr)%M)+M)%M)}}
+return o}
+function e8(d,inverse){
+const o=d.slice(),n=o.length;
+for(let i=0;i+4<n;i++){const c=o[i];
+if((c===232||c===233)&&(o[i+4]===0||o[i+4]===255)){
+const v=o[i+1]|(o[i+2]<<8)|(o[i+3]<<16),a=inverse?(v-(i+5))&0xffffff:(v+(i+5))&0xffffff;
+o[i+1]=a&255;o[i+2]=(a>>8)&255;o[i+3]=a>>16;i+=4}}
+return o}
+function roundText(d,dec){
+let s="";for(let i=0;i<d.length;i+=32768)s+=String.fromCharCode.apply(null,d.subarray(i,i+32768));
+s=s.replace(/-?\d+\.\d+(?![\deE.])/g,m=>{const f=m.length-m.indexOf(".")-1;if(f<=dec)return m;let r=Number(m).toFixed(dec);if(r.indexOf(".")>=0)r=r.replace(/0+$/,"").replace(/\.$/,"");return r==="-0"?"0":r});
+const o=new Uint8Array(s.length);for(let i=0;i<s.length;i++)o[i]=s.charCodeAt(i);return o}
+function detectStride(s){
+const N=s.length-1100;if(N<4000)return 0;
+const sc=new Float64Array(1026),m=Math.floor(N/3);
+for(let S=4;S<=1025;S++){let c=0;for(let i=0;i<N;i+=3)if(Math.abs(s[i]-s[i+S])<=3)c++;sc[S]=c/m}
+let best=0,bv=0;
+for(let S=5;S<=1024;S++){const pk=sc[S]-(sc[S-1]+sc[S+1])/2;if(sc[S]>.2&&pk>bv){bv=pk;best=S}}
+return bv>.03?best:0}
+function planBlocks(n,prof,ti,cores){
+const B=ti===2||n<131072?1:Math.max(1,Math.min(cores,Math.floor(n/65536)));
+const u=prof&&prof.k==="img"?prof.rowB:prof&&prof.k==="rec"?prof.S:1,off=prof&&prof.k!=="txt"?Math.max(0,prof.off):0,b=[0];
+if(B>1){const chunk=Math.max(u,Math.ceil((n-off)/B/u)*u);for(let k=1;k<B;k++){const x=off+k*chunk;if(x<n)b.push(x)}}
+b.push(n);return b}
+const cfgOf=(pi,ti,prof)=>({p:PRESETS[pi],t:TIERS[ti],prof:prof||null});
+</script>
+<script>
+let pool=null,poolOK=null;
+const WG=";onmessage=async e=>{const j=e.data,pg=v=>postMessage({v});const r=j.op==='enc'?await enc(j.data,j.cfg,pg):await dec(j.data,j.n,j.cfg,pg);const c=r.slice();postMessage({r:c},[c.buffer])}";
+function getPool(){
+if(poolOK!==null)return pool;
+try{
+const u=URL.createObjectURL(new Blob([document.getElementById("core").textContent+WG],{type:"text/javascript"})),c=Math.max(1,Math.min(4,navigator.hardwareConcurrency||2));
+pool=[];for(let i=0;i<c;i++)pool.push(new Worker(u));poolOK=true}
+catch(e){poolOK=false;pool=null}
+return pool}
+function runJob(w,j,pg){
+return new Promise((res,rej)=>{
+let t;const arm=()=>{clearTimeout(t);t=setTimeout(()=>rej(new Error("worker timeout")),10000)};
+arm();
+w.onmessage=e=>{if(e.data.v!==undefined){pg(e.data.v);arm()}else{clearTimeout(t);res(e.data.r)}};
+w.onerror=e=>{clearTimeout(t);rej(e)};
+w.postMessage(j)})}
+async function runAll(jobs,prog){
+const fr=new Array(jobs.length).fill(0),res=new Array(jobs.length);
+const rep=()=>{if(prog)prog(fr.reduce((a,b)=>a+b,0)/jobs.length)};
+const pl=jobs.length>1?getPool():null;
+if(pl){
+try{
+let nx=0;
+await Promise.all(pl.map(async w=>{while(nx<jobs.length){const k=nx++;res[k]=await runJob(w,jobs[k],v=>{fr[k]=v;rep()});fr[k]=1;rep()}}));
+return res}
+catch(e){poolOK=false;pool=null}}
+for(let k=0;k<jobs.length;k++){
+const j=jobs[k],pg=v=>{fr[k]=v;rep()};
+res[k]=await(j.op==="enc"?enc(j.data,j.cfg,pg):dec(j.data,j.n,j.cfg,pg));fr[k]=1;rep()}
+return res}
+const bp=(prof,s)=>prof?Object.assign({},prof,{off:(prof.off||0)-s}):null;
+async function encBlocks(data,prof,ti,pi,ui){
+const n=data.length,cores=typeof navigator!=="undefined"?Math.min(4,navigator.hardwareConcurrency||2):1;
+const b=planBlocks(n,prof,ti,cores),jobs=[];
+for(let k=0;k<b.length-1;k++)jobs.push({op:"enc",data:data.slice(b[k],b[k+1]),cfg:cfgOf(pi,ti,bp(prof,b[k]))});
+const res=await runAll(jobs,ui.prog);
+let tot=2+res.length*8;for(const r of res)tot+=r.length;
+const o=new Uint8Array(tot),dv=new DataView(o.buffer);
+dv.setUint16(0,res.length,true);
+let p=2+res.length*8;
+for(let k=0;k<res.length;k++){dv.setUint32(2+k*8,b[k+1]-b[k],true);dv.setUint32(6+k*8,res[k].length,true);o.set(res[k],p);p+=res[k].length}
+return o}
+async function decBlocks(pl,prof,ti,pi,ui){
+const dv=new DataView(pl.buffer,pl.byteOffset,pl.length),nb=dv.getUint16(0,true),jobs=[];
+let p=2+nb*8,s=0;
+for(let k=0;k<nb;k++){const rl=dv.getUint32(2+k*8,true),cl=dv.getUint32(6+k*8,true);jobs.push({op:"dec",data:pl.slice(p,p+cl),n:rl,cfg:cfgOf(pi,ti,bp(prof,s))});p+=cl;s+=rl}
+const res=await runAll(jobs,ui.prog),out=new Uint8Array(s);
+let q=0;for(const r of res){out.set(r,q);q+=r.length}
+return out}
+const same=(a,b)=>{if(a.length!==b.length)return false;for(let i=0;i<a.length;i++)if(a[i]!==b[i])return false;return true};
+const baseName=s=>s.replace(/\.[^.]*$/,"");
+const te=new TextEncoder(),td=new TextDecoder();
+function pack(mode,pb,n,name,meta,pl){
+const nb=te.encode(name).slice(0,200),mb=te.encode(JSON.stringify(meta)),r=new Uint8Array(13+nb.length+mb.length+pl.length),dv=new DataView(r.buffer);
+r.set([86,48,73,68,mode,pb]);dv.setUint32(6,n,true);r[10]=nb.length;r.set(nb,11);
+const p=11+nb.length;dv.setUint16(p,mb.length,true);r.set(mb,p+2);r.set(pl,p+2+mb.length);return r}
+function unprep(d,m){
+let r=d;
+if(m.t)r=inv(r,m.t);
+if(m.x)r=e8(r,true);
+if(m.a)r=pcm(r,m.a,true,0);
+return r}
+async function tune(d,ui){
+const s=sample(d,8192);let bt=0,bs=Infinity,bpi=0,k=0;
+ui.stage("Optimiser: testing transforms");
+for(let t=0;t<5;t++){
+const z=(await enc(fwd(s,t),cfgOf(0,0))).length;
+ui.log(TN[t].padEnd(10)+z+" B");
+if(z<bs){bs=z;bt=t}
+ui.prog(++k/8);await tick()}
+const ts=fwd(s,bt);
+ui.stage("Optimiser: testing presets");
+for(let p=1;p<4;p++){
+const z=(await enc(ts,cfgOf(p,0))).length;
+ui.log(PN[p].padEnd(15)+z+" B");
+if(z<bs){bs=z;bpi=p}
+ui.prog(++k/8);await tick()}
+ui.log("chosen: "+TN[bt]+" + "+PN[bpi]);
+return{t:bt,pr:bpi}}
+async function race(d,ui){
+const L=Math.min(d.length,49152),s0=(d.length-L)>>1,s=d.slice(s0,s0+L),S=detectStride(s),c=[null];
+if(S){c.push({k:"rec",off:0,S});c.push({k:"img",off:0,ch:1,rowB:S});if(S%3===0)c.push({k:"img",off:0,ch:3,rowB:S})}
+let bi=0,bz=0;
+for(let i=0;i<c.length;i++){
+const z=(await enc(s,cfgOf(0,0,c[i]))).length;
+ui.log("structure "+(c[i]?c[i].k+" stride "+(c[i].rowB||c[i].S)+(c[i].ch?" ×"+c[i].ch:""):"generic").padEnd(26)+z+" B");
+if(i===0)bz=z;else if(z<bz*.97){bz=z;bi=i}}
+return{prof:c[bi],ratio:bz/L}}
+const mkCanvas=(w,h)=>{const c=document.createElement("canvas");c.width=w;c.height=h;return c};
+const toBlob=(cv,m,q)=>new Promise(r=>cv.toBlob(r,m,q));
+function rawCanvas(d,c){
+const w=c.w,h=c.h,ch=c.ch,bp2=c.bps,rb=c.rowB,cv=mkCanvas(w,h),cx=cv.getContext("2d"),id=cx.createImageData(w,h),o=id.data;
+const g=(y,x,k)=>{const p=c.off+y*rb+(x*ch+k)*bp2;return bp2===1?d[p]:(c.le?d[p]|(d[p+1]<<8):(d[p]<<8)|d[p+1])};
+let mn=0,sc=1;
+if(bp2===2){let lo=65535,hi=0;for(let y=0;y<h;y++)for(let x=0;x<w;x++){const v=g(y,x,0);if(v<lo)lo=v;if(v>hi)hi=v}mn=lo;sc=255/Math.max(1,hi-lo)}
+const v=(y,x,k)=>bp2===2?Math.round((g(y,x,k)-mn)*sc):g(y,x,k);
+for(let y=0;y<h;y++){
+const yy=c.flip?h-1-y:y;
+for(let x=0;x<w;x++){
+const q=(yy*w+x)*4;
+if(ch===1){o[q]=o[q+1]=o[q+2]=v(y,x,0);o[q+3]=255}
+else{o[q]=v(y,x,c.bgr?2:0);o[q+1]=v(y,x,1);o[q+2]=v(y,x,c.bgr?0:2);o[q+3]=ch===4?v(y,x,3):255}}}
+cx.putImageData(id,0,0);return cv}
+async function psnr(src,w,h,blob){
+const bm=await createImageBitmap(blob),c=mkCanvas(w,h),x=c.getContext("2d");
+x.drawImage(bm,0,0);
+const t=x.getImageData(0,0,w,h).data;let s=0;
+for(let i=0;i<src.length;i+=4){const a=src[i]-t[i],b=src[i+1]-t[i+1],e=src[i+2]-t[i+2];s+=a*a+b*b+e*e}
+const m=s/(src.length/4*3);return m<1e-9?99:10*Math.log10(65025/m)}
+async function lossyImage(file,d,A,o,ui){
+const n=d.length,name=file.name;
+ui.stage("Decoding image");
+let cv;
+if(A.web){const bm=await createImageBitmap(file);cv=mkCanvas(bm.width,bm.height);cv.getContext("2d").drawImage(bm,0,0)}
+else cv=rawCanvas(d,A.dec);
+let mime="image/webp",best=null,qn=o.q;
+const probe=await toBlob(cv,mime,.8);
+if(!probe||probe.type!=="image/webp")mime="image/jpeg";
+if(o.auto){
+const w=cv.width,h=cv.height,src=cv.getContext("2d").getImageData(0,0,w,h).data;
+let lo=.1,hi=.98;
+ui.stage("Searching for the smallest invisible-loss quality");
+for(let k=0;k<6;k++){
+const m=(lo+hi)/2,b=await toBlob(cv,mime,m),p=await psnr(src,w,h,b);
+ui.log("quality "+m.toFixed(2)+": "+b.size+" B, "+p.toFixed(1)+" dB");ui.prog((k+1)/6);
+if(p>=41){hi=m;best=b;qn=m}else lo=m}
+if(!best){best=await toBlob(cv,mime,1);qn=1}}
+else best=await toBlob(cv,mime,o.q);
+const bytes=new Uint8Array(await best.arrayBuffer()),ext=mime==="image/webp"?".webp":".jpg";
+if(bytes.length>=n)return{bytes:d,name,note:"The original is already smaller than a lossy re-encode, so it is returned unchanged."};
+return{bytes,name:baseName(name)+"-shrunk"+ext,note:"Lossy "+ext.slice(1).toUpperCase()+", quality "+Math.round(qn*100)+(o.auto?", auto-fitted to about 41 dB PSNR, so the difference is not visible":"")+"."}}
+async function pixelPath(file,d,o,ui){
+const n=d.length,name=file.name,ti=o.tier;
+ui.stage("Decoding image");
+const bm=await createImageBitmap(file),w=bm.width,h=bm.height,cv=mkCanvas(w,h),cx=cv.getContext("2d");
+cx.drawImage(bm,0,0);
+const px=cx.getImageData(0,0,w,h).data;let op=true;
+for(let i=3;i<px.length;i+=4)if(px[i]!==255){op=false;break}
+const ch=op?3:4,raw=new Uint8Array(w*h*ch);
+for(let i=0,j=0;i<px.length;i+=4){raw[j++]=px[i];raw[j++]=px[i+1];raw[j++]=px[i+2];if(ch===4)raw[j++]=px[i+3]}
+const rowB=w*ch,prof={k:"img",off:0,ch,rowB};
+ui.stage("Estimating whether pixel modelling can win");
+const R=Math.min(h,Math.max(8,Math.floor(65536/rowB))),r0=(h-R)>>1,sub=raw.slice(r0*rowB,(r0+R)*rowB);
+const z=(await enc(sub,cfgOf(0,0,prof))).length;
+if(z/sub.length*raw.length>n*.9)return{bytes:d,name,note:"Lossless pixel modelling cannot beat this file (it is already a well-compressed PNG, JPEG or WebP). Switch to Lossy for a large saving."};
+ui.stage("Modelling pixels");ui.prog(0);
+const e=await encBlocks(raw,prof,ti,0,ui),out=pack(2,ti<<4,raw.length,name,{w,h,ch,pf:prof},e);
+if(out.length>=n)return{bytes:d,name,note:"No lossless gain on this image. Switch to Lossy for a large saving."};
+let ok=null;
+if(o.verify){ui.stage("Verifying");ui.prog(0);ok=same(await decBlocks(e,prof,ti,0,ui),raw)}
+return{bytes:out,name:name+".v0id.txt",ok,note:"Pixel-exact archive. Restores as a PNG."}}
+async function compress(file,d,A,o,ui){
+const n=d.length,name=file.name,ti=o.tier;
+let pre=d,note="",prof=A.prof;
+if(o.lossy){
+if(A.lossy==="img")return lossyImage(file,d,A,o,ui);
+if(A.lossy==="txt"){pre=roundText(d,o.dec);note="Numbers rounded to "+o.dec+" decimals. "}
+else if(A.lossy==="aud")note="Dropped "+o.bits+" low bits per sample. ";
+else note="No lossy form exists for this format, so it was compressed losslessly. "}
+if(!o.lossy&&A.web&&!A.prof)return pixelPath(file,d,o,ui);
+let data=pre;const meta={};
+if(A.aud){const a=Object.assign({},A.aud);a.po=pickPo(d,a);data=pcm(pre,a,false,o.lossy?o.bits:0);meta.a=a;prof={k:"rec",off:a.off,S:a.bs*a.ch}}
+else if(A.x86){data=e8(pre,false);meta.x=1}
+let pr=0;
+if(!prof&&data.length>=32768){
+ui.stage("Analysing structure");
+const r=await race(data,ui);prof=r.prof;
+if(r.ratio>.97&&n>=65536)return{bytes:d,name,note:"This file is already compressed (zip, video, audio and photo codecs look like random noise). No lossless method can shrink it, so it is returned unchanged."}}
+if(!prof&&ti===2&&data.length>=4096){const r=await tune(data,ui);pr=r.pr;if(r.t){data=fwd(data,r.t);meta.t=r.t}}
+meta.pf=prof;
+ui.stage("Compressing");ui.prog(0);
+const e=await encBlocks(data,prof,ti,pr,ui),out=pack(1,pr|(ti<<4),data.length,name,meta,e);
+if(out.length>=n)return{bytes:d,name,note:"No gain is possible on this data, so it is returned unchanged."};
+let ok=null;
+if(o.verify){
+ui.stage("Verifying");ui.prog(0);
+const back=await decBlocks(e,prof,ti,pr,ui);
+ok=same(back,data);
+if(ok&&!(o.lossy&&A.aud))ok=same(unprep(back,meta),pre)}
+return{bytes:out,name:name+".v0id.txt",ok,note:note+EN[ti]+" effort"+(meta.t||pr?", tuned: "+TN[meta.t||0]+" + "+PN[pr]:"")+"."}}
+function toPng(raw,w,h,ch){
+const c=mkCanvas(w,h),cx=c.getContext("2d"),id=cx.createImageData(w,h),o=id.data;
+for(let i=0,j=0;i<w*h;i++){o[i*4]=raw[j++];o[i*4+1]=raw[j++];o[i*4+2]=raw[j++];o[i*4+3]=ch===4?raw[j++]:255}
+cx.putImageData(id,0,0);
+return new Promise(r=>c.toBlob(async b=>r(new Uint8Array(await b.arrayBuffer())),"image/png"))}
+async function decompress(d,ui){
+if(!(d[0]===86&&d[1]===48&&d[2]===73&&d[3]===68))throw new Error("Not a V0ID archive");
+const mode=d[4],pb=d[5],nl=d[10];
+if(mode>2||(pb&15)>3||(pb>>4)>2)throw new Error("Corrupt header");
+const name=td.decode(d.subarray(11,11+nl))||"restored.bin",p=11+nl,ml=L16(d,p),meta=JSON.parse(td.decode(d.subarray(p+2,p+2+ml))),pl=d.subarray(p+2+ml);
+ui.stage("Decoding");
+const raw=await decBlocks(pl,meta.pf,pb>>4,pb&15,ui);
+if(mode===1)return{bytes:unprep(raw,meta),name,note:"Restored exactly."};
+return{bytes:await toPng(raw,meta.w,meta.h,meta.ch),name:baseName(name)+".png",note:"Pixel-exact image restored as PNG."}}
+const $=s=>document.getElementById(s);
+const fmt=n=>n<1024?n+" B":n<1048576?(n/1024).toFixed(1)+" KB":(n/1048576).toFixed(2)+" MB";
+const val=n=>document.querySelector('input[name="'+n+'"]:checked').value;
+const SL={img:{l:"Quality",min:10,max:95,v:75},aud:{l:"Bits to drop",min:1,max:10,v:3},txt:{l:"Decimals kept",min:1,max:6,v:3}};
+let file=null,data=null,A=null,kind="c",result=null,dlcap=null;
+try{if(window.claude&&typeof claude.use==="function")claude.use("downloads").then(d=>{dlcap=d}).catch(()=>{})}catch(_){}
+function upd(){
+const ly=val("md")==="lossy",k=A&&A.lossy;
+$("auto").hidden=!(ly&&k==="img");
+$("qf").hidden=!(ly&&k&&!(k==="img"&&$("ac").checked));
+$("ln").hidden=!(ly&&A&&!k);
+$("qo").textContent=$("q").value}
+document.querySelectorAll('input[name="md"]').forEach(r=>r.onchange=upd);
+$("ac").onchange=upd;$("q").oninput=upd;
+async function pick(f){
+if(!f)return;
+file=f;result=null;
+for(const i of["dl","res","lc"])$(i).hidden=true;
+$("log").textContent="";$("msg").textContent="";$("msg").className="";$("bar").style.width="0";$("stage").textContent="";
+data=new Uint8Array(await f.arrayBuffer());
+kind=data[0]===86&&data[1]===48&&data[2]===73&&data[3]===68?"d":"c";
+A=kind==="c"?analyze(data,f.name,f.type):null;
+if(A&&A.lossy){const s=SL[A.lossy];$("ql").textContent=s.l;$("q").min=s.min;$("q").max=s.max;$("q").value=s.v}
+document.querySelector('input[name="md"][value="'+(A&&A.web&&!A.prof?"lossy":"lossless")+'"]').checked=true;
+$("ver").checked=f.size<262144;upd();
+$("info").textContent=f.name+" / "+fmt(f.size)+" / "+(A?A.fmt:"V0ID archive");
+$("run").textContent=kind==="c"?"Compress":"Restore";$("run").disabled=false}
+$("file").onchange=e=>pick(e.target.files[0]);
+const dz=$("drop");
+dz.ondragover=e=>{e.preventDefault();dz.classList.add("on")};
+dz.ondragleave=()=>dz.classList.remove("on");
+dz.ondrop=e=>{e.preventDefault();dz.classList.remove("on");pick(e.dataTransfer.files[0])};
+const row=(k,v)=>"<dt>"+k+"</dt><dd>"+v+"</dd>";
+$("run").onclick=async()=>{
+if(!file)return;
+$("run").disabled=true;$("dl").hidden=true;$("res").hidden=true;$("lc").hidden=true;$("msg").textContent="";$("msg").className="";$("log").textContent="";
+const ui={prog:v=>{$("bar").style.width=(v*100).toFixed(1)+"%"},stage:s=>{$("stage").textContent=s},log:s=>{$("lc").hidden=false;$("log").textContent+=s+"\n"}};
+const t0=performance.now(),s=+$("q").value;
+try{
+const r=kind==="c"?await compress(file,data,A,{tier:+val("tier"),verify:$("ver").checked,lossy:val("md")==="lossy",auto:$("ac").checked,q:s/100,bits:s,dec:s},ui):await decompress(data,ui);
+result=r;
+const sec=(performance.now()-t0)/1000,a=data.length,b=r.bytes.length;
+ui.prog(1);ui.stage("Finished in "+sec.toFixed(1)+" s");
+if(kind==="c"){
+const pct=(1-b/a)*100;
+$("hero").textContent=pct>0.05?"−"+pct.toFixed(1)+"%":"0%";
+$("sz").textContent=fmt(a)+"  →  "+fmt(b);
+$("st").innerHTML=row("Detected",A.fmt)+row("Ratio",(a/b).toFixed(2)+"×")+row("Bits per byte",(b*8/Math.max(a,1)).toFixed(3))+row("Time",sec.toFixed(1)+" s")+row("Throughput",(a/1024/sec).toFixed(0)+" KB/s")}
+else{
+$("hero").textContent="DONE";
+$("sz").textContent=fmt(a)+"  →  "+fmt(b);
+$("st").innerHTML=row("Time",sec.toFixed(1)+" s")}
+$("msg").textContent=r.note+(r.ok===true?" Verified: decoded output matches.":"");
+if(r.ok===false){$("msg").textContent="VERIFICATION FAILED. Do not trust this archive.";$("msg").className="err"}
+$("res").hidden=false;
+$("dl").hidden=false;$("dl").textContent="Save "+r.name.slice(-24)
+}catch(e){$("msg").textContent="Error: "+(e.message||e);$("msg").className="err"}
+$("run").disabled=false};
+$("dl").onclick=async()=>{
+if(!result)return;
+const blob=new Blob([result.bytes]);
+if(!dlcap){const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=result.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),60000);return}
+try{await dlcap.save({filename:result.name,data:blob})}
+catch(e){
+if(e&&e.code==="rejected_extension"){
+try{await dlcap.save({filename:result.name+".txt",data:blob});$("msg").textContent="Saved with an extra .txt on the end. Remove it after downloading."}catch(_){}}
+else if(e&&e.code!=="declined"){$("msg").textContent="Save failed: "+(e.message||e.code);$("msg").className="err"}}};
+</script></body></html>
